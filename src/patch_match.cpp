@@ -33,8 +33,8 @@ void patch_match_propagation(
     int half = patchSize / 2;
     int rows = target.rows;
     int cols = target.cols;
-    for (int row = 0; row < rows; ++row) {
-        for (int col = 0; col < cols; ++col) {
+    for (int row = half; row < rows-half; ++row) {
+        for (int col = half; col < cols-half; ++col) {
             Vec2i pos(row, col);
             if (mask(pos) == 0)
                 continue ;
@@ -52,11 +52,14 @@ void patch_match_propagation(
                 if (d < distances(pos)) {
                     distances(pos) = d;
                     offset(pos) = center;
-                    target(pos) = target(offset(pos));
+                    //target(pos) = target(offset(pos));
                 }
             }
         }
     }
+    target.forEach([&](Vec3b& pixel, const int pos[]){
+        pixel = target(offset(pos[0],pos[1]));
+    });
 }
 
 void
@@ -93,7 +96,15 @@ patch_match(
     Mat2i offset(rows, cols);
     offset.forEach([&](Vec2i& pixel, const int pos[]){
         pixel[0] = pos[0];
+        if (pixel[0] < half)
+            pixel[0] = half;
+        if (pixel[0] >= rows - half)
+            pixel[0] = rows - half - 1;
         pixel[1] = pos[1];
+        if (pixel[1] < half)
+            pixel[1] = half;
+        if (pixel[1] >= cols - half)
+            pixel[1] = cols - half - 1;
         while (mask(pixel[0], pixel[1]) != 0) {
             pixel[0] = rng.uniform(half, rows - half);
             pixel[1] = rng.uniform(half, cols - half);

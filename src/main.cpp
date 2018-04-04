@@ -25,8 +25,14 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    cvtColor(image, image, CV_BGR2Lab);
+
     Mat3b target;
     patch_match(image, mask, target, 7, 6);
+    std::cout << "done" << std::endl;
 
-    waitKey();
+    cvtColor(target, target, CV_Lab2BGR);
+    imshow("Inpainting", target);
+
+    while (waitKey(100) != 'q') {}
 }

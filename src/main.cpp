@@ -17,6 +17,7 @@ int main(int argc, char** argv) {
         std::cout << "No image data \n";
         return -1;
     }
+    //cvtColor(image, image, CV_BGR2Lab);
 
     Mat1b mask;
     mask = imread(argv[2], CV_LOAD_IMAGE_GRAYSCALE);
@@ -25,13 +26,13 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    cvtColor(image, image, CV_BGR2Lab);
+    namedWindow("Inpainting", WINDOW_AUTOSIZE);
 
     Mat3b target;
-    patch_match(image, mask, target, 7, 6);
-    std::cout << "done" << std::endl;
+    RandomizedPatchMatch rpm(image, mask, target, 11);
+    rpm.computeNN(5);
 
-    cvtColor(target, target, CV_Lab2BGR);
+    //cvtColor(target, target, CV_Lab2BGR);
     imshow("Inpainting", target);
 
     while (waitKey(100) != 'q') {}

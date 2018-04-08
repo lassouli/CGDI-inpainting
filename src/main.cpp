@@ -21,19 +21,20 @@ int main(int argc, char** argv) {
 
     Mat1b mask;
     mask = imread(argv[2], CV_LOAD_IMAGE_GRAYSCALE);
+    mask.forEach([](uchar& p, const int[]){ if (p > 0) p = 255;});
     if (!mask.data) {
         std::cout << "No mask data \n";
         return -1;
     }
 
-    namedWindow("Inpainting", WINDOW_AUTOSIZE);
+    //namedWindow("Inpainting", WINDOW_AUTOSIZE);
 
     Mat3b target;
-    RandomizedPatchMatch rpm(image, mask, target, 11);
-    rpm.computeNN(5);
+    RandomizedPatchMatch rpm(image, mask, target, 7);
+    rpm.computeNN(3);
 
     //cvtColor(target, target, CV_Lab2BGR);
-    imshow("Inpainting", target);
+    //imshow("Inpainting", target);
 
-    while (waitKey(100) != 'q') {}
+    //while (waitKey(100) != 'q') {}
 }

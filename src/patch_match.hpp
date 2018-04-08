@@ -22,14 +22,13 @@ class RandomizedPatchMatch {
         return is_inside(rect.bottomLeft) && is_inside(rect.topRight);
     }
 
+    void onionPeelInitialization();
+    void reconstruction();
+    void final_reconstruction();
+
     void update(cv::Vec2i pos, cv::Vec2i candidate, float distance);
-
     cv::Rect get_patch(cv::Vec2i const& p, int half) const;
-
-    float patch_distance(
-        cv::Rect const& origin_patch,
-        cv::Rect const& candidate_patch
-    ) const;
+    float patch_distance(cv::Rect const& origin_patch,cv::Rect const& candidate_patch) const;
 
     void patch_match_propagation(int parity);
     void patch_match_search();

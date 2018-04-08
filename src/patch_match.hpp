@@ -11,6 +11,7 @@ struct PatchZone {
 };
 
 class RandomizedPatchMatch {
+public:
     static cv::Matx<cv::Vec2i,2,2> const dirs;
     static const int inv_alpha = 2;
 

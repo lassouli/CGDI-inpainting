@@ -48,6 +48,15 @@ RandomizedPatchMatch::RandomizedPatchMatch(
         pixel = source(offset(pos[0], pos[1]));
     });
     onionPeelInitialization();
+    distances.forEach([&](float& d, const int coords[]){
+        Vec2i pos(coords[0], coords[1]);
+        PatchZone ptz(pos, patchSize);
+        if (mask(pos) != 0 || !is_inside(ptz))
+            return ;
+        Rect origin_patch = get_patch(pos, half);
+        Rect candidate_patch = get_patch(offset(pos), half);
+        d = patch_distance(origin_patch, candidate_patch);
+    });
 }
 
 void RandomizedPatchMatch::final_reconstruction() {
@@ -165,6 +174,8 @@ void RandomizedPatchMatch::onionPeelInitialization() {
             add_neighbours(pos);
         }
         swap_queue();
+        imshow("Inpainting", target);
+        waitKey(20);
     }
 }
 
@@ -191,7 +202,7 @@ float RandomizedPatchMatch::patch_distance(
 {
     Mat3b origin(target, origin_patch);
     Mat3b candidate(target, candidate_patch);
-    return norm(origin, candidate, NORM_L2SQR) / (cols * rows);
+    return norm(origin, candidate, NORM_L2SQR) / (origin_patch.width * origin_patch.height);
 }
 
 void RandomizedPatchMatch::patch_match_propagation(int parity)
@@ -261,8 +272,8 @@ void RandomizedPatchMatch::computeNN(int nbIterations)
         std::cout << "|" << flush;
         patch_match_iteration(iteration_num);
         reconstruction();
-        //imshow("Inpainting", target);
-        //waitKey(2000);
+        imshow("Inpainting", target);
+        waitKey(2000);
     }
     final_reconstruction();
     cout << endl;

@@ -9,7 +9,12 @@ file (GLOB_RECURSE source_files
 	    src/*.hpp
 )
 
+file (GLOB_RECURSE gui_files
+	GUI/*.cpp
+)
+
 add_executable(Inpainting ${source_files})
+add_executable(create_mask ${gui_files})
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})

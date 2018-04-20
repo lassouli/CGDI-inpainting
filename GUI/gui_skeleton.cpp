@@ -1,5 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
+
+#define CVUI_IMPLEMENTATION
 #include "cvui.h"
 
 #define WINDOW_NAME "CVUI Mask Creator"

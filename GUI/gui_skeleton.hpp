@@ -8,7 +8,7 @@
 
 using namespace cv;
 
-int main(int argc, char const *argv[]) {
+int mask_from_scratch(int argc, char *argv[]) {
   if (argc != 2) {
     std::cout << "Use: Create_mask <image>" << "\n" ;
     return 1 ;

@@ -7,6 +7,7 @@ set(EXECUTABLE_OUTPUT_PATH bin/)
 file (GLOB_RECURSE source_files
         src/*.cpp
 	    src/*.hpp
+	    GUI/*.hpp
 )
 
 file (GLOB_RECURSE gui_files

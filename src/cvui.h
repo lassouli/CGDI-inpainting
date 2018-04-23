@@ -29,10 +29,10 @@ namespace cvui
  automatically call `cv::waitKey()` within `cvui::update()`, so you don't
  have to worry about it. The value passed to `theDelayWaitKey` will be
  used as the delay for `cv::waitKey()`.
- 
+
  \param theWindowName name of the window where the components will be added.
  \param theDelayWaitKey delay value passed to `cv::waitKey()`. If a negative value is informed (default is `-1`), cvui will not automatically call `cv::waitKey()` within `cvui::update()`, which will disable keyboard shortcuts for all components. If you want to enable keyboard shortcut for components (e.g. using & in a button label), you must specify a positive value for this param.
- \param theCreateNamedWindow if an OpenCV window named `theWindowName` should be created during the initialization. Windows are created using `cv::namedWindow()`. If this parameter is `false`, ensure you call `cv::namedWindow(WINDOW_NAME)` *before* initializing cvui, otherwise it will not be able to track UI interactions. 
+ \param theCreateNamedWindow if an OpenCV window named `theWindowName` should be created during the initialization. Windows are created using `cv::namedWindow()`. If this parameter is `false`, ensure you call `cv::namedWindow(WINDOW_NAME)` *before* initializing cvui, otherwise it will not be able to track UI interactions.
 
  \sa watch()
  \sa context()
@@ -172,7 +172,7 @@ cv::Point mouse(const cv::String& theWindowName = "");
 
 /**
  Query the mouse for events, e.g. "is any button down now?". Available queries are:
- 
+
  * `cvui::DOWN`: any mouse button was pressed. `cvui::mouse()` returns `true` for a single frame only.
  * `cvui::UP`: any mouse button was released.  `cvui::mouse()` returns `true` for a single frame only.
  * `cvui::CLICK`: any mouse button was clicked (went down then up, no matter the amount of frames in between). `cvui::mouse()` returns `true` for a single frame only.
@@ -266,7 +266,7 @@ bool button(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, 
 /**
  Display a button whose graphics are images (cv::Mat). The button accepts three images to describe its states,
  which are idle (no mouse interaction), over (mouse is over the button) and down (mouse clicked the button).
- The button size will be defined by the width and height of the images. 
+ The button size will be defined by the width and height of the images.
 
  \param theWhere the image/frame where the component should be rendered.
  \param theX position X where the component should be placed.
@@ -283,7 +283,7 @@ bool button(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, 
 bool button(cv::Mat& theWhere, int theX, int theY, cv::Mat& theIdle, cv::Mat& theOver, cv::Mat& theDown);
 
 /**
- Display an image (cv::Mat). 
+ Display an image (cv::Mat).
 
  \param theWhere the image/frame where the provded image should be rendered.
  \param theX position X where the image should be placed.
@@ -337,7 +337,7 @@ void text(cv::Mat& theWhere, int theX, int theY, const cv::String& theText, doub
  \param theFontScale size of the text.
  \param theColor color of the text in the format `0xRRGGBB`, e.g. `0xff0000` for red.
  \param theFmt formating string as it would be supplied for `stdio's printf()`, e.g. `"Text: %d and %f", 7, 3.1415`.
- 
+
  \sa text()
 */
 void printf(cv::Mat& theWhere, int theX, int theY, double theFontScale, unsigned int theColor, const char *theFmt, ...);
@@ -393,8 +393,8 @@ double counter(cv::Mat& theWhere, int theX, int theY, double *theValue, double t
  Display a trackbar for numeric values that the user can increase/decrease
  by clicking and/or dragging the marker right or left. This component uses templates
  so it is imperative that you make it very explicit the type of `theValue`, `theMin`, `theMax` and `theStep`,
- otherwise you might end up with weird compilation errors. 
- 
+ otherwise you might end up with weird compilation errors.
+
  Example:
 
  ```
@@ -495,8 +495,8 @@ int iarea(int theX, int theY, int theWidth, int theHeight);
 
 /**
  Start a new row.
- 
- One of the most annoying tasks when building UI is to calculate 
+
+ One of the most annoying tasks when building UI is to calculate
  where each component should be placed on the screen. cvui has
  a set of methods that abstract the process of positioning
  components, so you don't have to think about assigning a
@@ -531,8 +531,8 @@ int iarea(int theX, int theY, int theWidth, int theHeight);
 
  ```
  beginRow(frame, x, y, width, height);
-  text("test");       
-  button("btn"); 
+  text("test");
+  button("btn");
 
   beginColumn();      // no frame nor x,y parameters here!
    text("column1");
@@ -558,7 +558,7 @@ void beginRow(cv::Mat &theWhere, int theX, int theY, int theWidth = -1, int theH
 
 /**
  Ends a row. You must call this function only if you have previously called
- its counter part, the `beginRow()` function. 
+ its counter part, the `beginRow()` function.
 
 \sa beginRow()
 \sa beginColumn()
@@ -694,7 +694,7 @@ void space(int theValue = 5);
 */
 void text(const cv::String& theText, double theFontScale = 0.4, unsigned int theColor = 0xCECECE);
 
-// 
+//
 /**
  Display a button within a `begin*()` and `end*()` block.
  The button size will be defined by the width and height parameters,
@@ -790,7 +790,7 @@ bool checkbox(const cv::String& theLabel, bool *theState, unsigned int theColor 
 
 /**
  Display a piece of text within a `begin*()` and `end*()` block.
- 
+
  IMPORTANT: this function can only be used within a `begin*()/end*()` block, otherwise it does nothing.
 
  The text can be formated using `stdio's printf()` style. For instance if you want to display text mixed
@@ -814,7 +814,7 @@ void printf(double theFontScale, unsigned int theColor, const char *theFmt, ...)
 
 /**
  Display a piece of text that can be formated using `stdio's printf()` style.
- 
+
  IMPORTANT: this function can only be used within a `begin*()/end*()` block, otherwise it does nothing.
 
  For instance if you want to display text mixed with numbers, you can use:
@@ -934,7 +934,7 @@ void window(int theWidth, int theHeight, const cv::String& theTitle);
 
 /**
  Display a rectangle within a `begin*()` and `end*()` block.
- 
+
  IMPORTANT: this function can only be used within a `begin*()/end*()` block, otherwise it does nothing.
 
  \param theWidth width of the rectangle.
@@ -1187,7 +1187,7 @@ namespace internal
 		aParams.options = theOptions;
 		aParams.segments = theSegments;
 		aParams.labelFormat = theLabelFormat;
-	
+
 		return aParams;
 	}
 
@@ -1209,7 +1209,7 @@ namespace internal
 		long double aValueAsDouble = static_cast<long double>(*theValue);
 		bool aResult = internal::trackbar(gScreen, theX, theY, theWidth, &aValueAsDouble, theParams);
 		*theValue = static_cast<num_type>(aValueAsDouble);
-		
+
 		return aResult;
 	}
 }
@@ -1761,7 +1761,7 @@ namespace internal
 	void rect(cvui_block_t& theBlock, int theX, int theY, int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor) {
 		cv::Point aAnchor(theX, theY);
 		cv::Rect aRect(theX, theY, theWidth, theHeight);
-		
+
 		aRect.x = aRect.width < 0 ? aAnchor.x + aRect.width : aAnchor.x;
 		aRect.y = aRect.height < 0 ? aAnchor.y + aRect.height : aAnchor.y;
 		aRect.width = std::abs(aRect.width);
@@ -1833,7 +1833,7 @@ namespace render
 		cv::putText(theBlock.where, text, positionDecentered, cv::FONT_HERSHEY_SIMPLEX, aFontScale, cv::Scalar(0xCE, 0xCE, 0xCE), 1, CVUI_ANTIALISED);
 
 		return size.width;
-	};
+	}
 
 	void buttonLabel(cvui_block_t& theBlock, int theState, cv::Rect theRect, const cv::String& theLabel, cv::Size& theTextSize) {
 		cv::Point aPos(theRect.x + theRect.width / 2 - theTextSize.width / 2, theRect.y + theRect.height / 2 + theTextSize.height / 2);
@@ -2105,7 +2105,7 @@ void watch(const cv::String& theWindowName, bool theCreateNamedWindow) {
 	aContex.windowName = theWindowName;
 	aContex.mouse.position.x = 0;
 	aContex.mouse.position.y = 0;
-	
+
 	internal::resetMouseButton(aContex.mouse.anyButton);
 	internal::resetMouseButton(aContex.mouse.buttons[RIGHT_BUTTON]);
 	internal::resetMouseButton(aContex.mouse.buttons[MIDDLE_BUTTON]);
@@ -2359,7 +2359,7 @@ void update(const cv::String& theWindowName) {
 		aContext.mouse.buttons[i].justReleased = false;
 		aContext.mouse.buttons[i].justPressed = false;
 	}
-	
+
 	internal::resetRenderingBuffer(internal::gScreen);
 
 	// If we were told to keep track of the keyboard shortcuts, we
@@ -2377,9 +2377,9 @@ void handleMouse(int theEvent, int theX, int theY, int theFlags, void* theData) 
 	int aButtons[3] = { cvui::LEFT_BUTTON, cvui::MIDDLE_BUTTON, cvui::RIGHT_BUTTON };
 	int aEventsDown[3] = { cv::EVENT_LBUTTONDOWN, cv::EVENT_MBUTTONDOWN, cv::EVENT_RBUTTONDOWN };
 	int aEventsUp[3] = { cv::EVENT_LBUTTONUP, cv::EVENT_MBUTTONUP, cv::EVENT_RBUTTONUP };
-	
+
 	cvui_context_t *aContext = (cvui_context_t *)theData;
-	
+
 	for (int i = 0; i < 3; i++) {
 		int aBtn = aButtons[i];
 
@@ -2396,7 +2396,7 @@ void handleMouse(int theEvent, int theX, int theY, int theFlags, void* theData) 
 			aContext->mouse.buttons[aBtn].pressed = false;
 		}
 	}
-	
+
 	aContext->mouse.position.x = theX;
 	aContext->mouse.position.y = theY;
 }

@@ -28,7 +28,7 @@ link_directories(${OpenCV_LIBRARY_DIRS})
 target_link_libraries(Inpainting ${OpenCV_LIBS} ${Boost_LIBRAIRIES}  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-    add_definitions(-std=c++14 -Wall -Wextra -pedantic)
+    add_definitions(-std=c++14 -pedantic)
     add_definitions(-O3 -s -DNDEBUG)
     add_definitions(${GCC_COVERAGE_LINK_FLAGS}$)
 endif()

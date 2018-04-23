@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <limits>
 
 #include "reconstruction.hpp"
 
@@ -47,16 +48,16 @@ float reconstruction(Mat3b& target, cv::Mat2f& features, Mat1b const& mask, Patc
             return ;
         Rect origin = pm.get_patch(pos);
         float sum = 0.f;
-        Vec3f color(0,0,0);
-        Vec2f feature(0,0);
+        Vec3d color(0,0,0);
+        Vec2d feature(0,0);
         for (int row = origin.y; row < origin.y+origin.height; ++row) {
             for (int col = origin.x; col < origin.x+origin.width; ++col) {
                 Vec2i q(row, col);
                 Vec2i alter_ego = pos - q + pm.offset(q);
                 if (!pm.is_inside(alter_ego) || mask(alter_ego))
                     continue ;
-                float sq = s(q);
-                color += sq * static_cast<Vec3f>(target(alter_ego));
+                double sq = max(double(s(q)), numeric_limits<double>::epsilon());
+                color += sq * static_cast<Vec3d>(target(alter_ego));
                 feature += sq * features(alter_ego);
                 sum += sq;
             }
@@ -142,6 +143,7 @@ void onionPeelInitialization(Mat3b& target, Mat2f& features, Mat1b const& mask, 
                     pm.crop(a, q, b, pm.offset(q));
                     double dst = patch_distance(a, b, available);
                     double s = exp(-dst / (2*sigma*sigma));
+                    s = max(s, numeric_limits<double>::epsilon());
                     color += s * static_cast<Vec3d>(target(alter_ego));
                     feature += s * static_cast<Vec2d>(features(alter_ego));
                     sum += s;

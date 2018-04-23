@@ -19,6 +19,7 @@ void clean_mask(Mat1b& mask) {
 struct Options {
     string image;
     string mask;
+    string outputname;
     int patchSize;
     float lambda;
     int AnnIt;
@@ -30,7 +31,8 @@ int main(int argc, char** argv) {
     desc.add_options()
         ("help,h", "produce help message")
         ("image,i", po::value<string>(&options.image), "image name")
-        ("mask,m", po::value<string>(&options.mask)->default_value("/"), "mask name, if provided")
+        ("mask,m", po::value<string>(&options.mask)->default_value(""), "mask name, if provided")
+        ("create,c", po::value<string>(&options.outputname)->default_value(""), "name of the saved mask, if provided")
         ("patchSize,p", po::value<int>(&options.patchSize)->default_value(7), "patch size")
         ("lambda,l", po::value<float>(&options.lambda)->default_value(50.f), "lambda texture feature")
         ("AnnIt,a", po::value<int>(&options.AnnIt)->default_value(10), "number of ANN iterations")
@@ -55,7 +57,7 @@ int main(int argc, char** argv) {
     }
 
     Mat1b mask;
-    if (options.mask != "/") {
+    if (!options.mask.empty()) {
         mask = imread(options.mask, CV_LOAD_IMAGE_GRAYSCALE);
         if (!mask.data) {
             cout << "No mask data \n";
@@ -65,6 +67,10 @@ int main(int argc, char** argv) {
     } else {
         cout << "Press ECHAP when the mask is completed. Use + or - to increase or decrease pencil size." << endl;
         mask_from_scratch(image, mask);
+    }
+
+    if (!options.outputname.empty()) {
+        imwrite(options.outputname, mask);
     }
 
     namedWindow("Inpainting", WINDOW_AUTOSIZE);

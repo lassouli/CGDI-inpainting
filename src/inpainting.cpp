@@ -90,7 +90,7 @@ void inpaint(Mat3b const& image, Mat1b const& mask, Mat3b& output, int patchSize
             waitKey(1);
             float e = norm(before, imgPyr[l], NORM_L1) / 255.f;
             e /= (3.f*area[l]);
-            if (e < 0.01f) {
+            if (e < 0.001f) {
                 break ;
             }
         }

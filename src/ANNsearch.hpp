@@ -6,10 +6,10 @@
 struct PatchDistance {
     cv::Mat3b target;
     cv::Mat2f features;
-    cv::Mat1b available;
     float lambda;
     PatchDistance(cv::Mat3b const& target, cv::Mat2f const& features, float lambda);
     float operator()(cv::Rect const& origin_patch, cv::Rect const& candidate_patch) const;
+    float operator()(cv::Rect const& origin_patch, cv::Rect const& candidate_patch, cv::Mat1b const& available) const;
 };
 
 class PatchMap {

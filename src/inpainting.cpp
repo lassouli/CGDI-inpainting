@@ -28,20 +28,34 @@ namespace {
             pyr.forEach([](uchar& p, const int[]){ if (p > 0) p = 255;});
         }
     }
-}
 
-void computeArea(vector<float>& area, vector<Mat1b> const& maskPyr) {
-    for (int l = 0; l < (int)maskPyr.size(); ++l) {
-        for (int row = 0; row < maskPyr[l].rows; ++row) {
-            for (int col = 0; col < maskPyr[l].cols; ++col) {
-                area[l] += 1.f;
+    void computeArea(vector<float>& area, vector<Mat1b> const& maskPyr) {
+        for (int l = 0; l < (int)maskPyr.size(); ++l) {
+            for (int row = 0; row < maskPyr[l].rows; ++row) {
+                for (int col = 0; col < maskPyr[l].cols; ++col) {
+                    area[l] += 1.f;
+                }
             }
         }
     }
+
+    int computeOcclusionSize(cv::Mat1b const& mask) {
+        Mat1b eroded = mask.clone();
+        int s = 0;
+        while (countNonZero(eroded) != 0) {
+            auto eroder = getStructuringElement(MORPH_RECT, Size(3, 3));
+            erode(eroded, eroded, eroder);
+            s += 1;
+            imshow("Inpainting", eroded);
+            waitKey(1);
+        }
+        return s;
+    }
 }
 
-void inpaint(Mat3b const& image, Mat1b const& mask, Mat3b& output) {
-    const int L = 4;
+void inpaint(Mat3b const& image, Mat1b const& mask, Mat3b& output, int patchSize, float lambda, int AnnIt) {
+    const int occSize = computeOcclusionSize(mask);
+    const int L = int(log2(2 * occSize / patchSize));
     vector<Mat3b> imgPyr(L+1);
     vector<Mat1b> maskPyr(L+1);
     vector<Mat2f> featurePyr(L+1);
@@ -50,10 +64,10 @@ void inpaint(Mat3b const& image, Mat1b const& mask, Mat3b& output) {
     buildTextureFeaturePyramid(image, featurePyr, L);
     vector<float> area(L+1, 0.f);
     computeArea(area, maskPyr);
-    PatchMap pm(maskPyr.back(), 7);
-    onionPeelInitialization(imgPyr.back(), featurePyr.back(), maskPyr.back(), pm);
+    PatchMap pm(maskPyr.back(), patchSize);
+    onionPeelInitialization(imgPyr.back(), featurePyr.back(), maskPyr.back(), pm, PatchDistance(imgPyr.back(), featurePyr.back(), lambda));
     for (int l = L; l >= 0; --l) {
-        PatchDistance patch_distance(imgPyr[l], featurePyr[l], 50.f);
+        PatchDistance patch_distance(imgPyr[l], featurePyr[l], lambda);
         if (l != L) {
             pm.upSample(maskPyr[l]);
             upSample(imgPyr[l], maskPyr[l], pm);
@@ -67,15 +81,15 @@ void inpaint(Mat3b const& image, Mat1b const& mask, Mat3b& output) {
         pm.updateDistances(patch_distance);
         for (int k = 0; k < 10; ++k) {
             Mat3b before = imgPyr[l].clone();
-            ANNsearch(pm, patch_distance, 10);
+            ANNsearch(pm, patch_distance, AnnIt);
             float sigma = reconstruction(imgPyr[l], featurePyr[l], maskPyr[l], pm);
             cout << "[l, k, sigma] " << l << " " << k << " " << sigma << endl;
             pm.updateDistances(patch_distance);
             imshow("Inpainting", imgPyr[l]);
             waitKey(1);
-            float e = norm(before, imgPyr[l], NORM_L1);
+            float e = norm(before, imgPyr[l], NORM_L1) / 255.f;
             e /= (3.f*area[l]);
-            if (e < 0.1f) {
+            if (e < 0.01f) {
                 break ;
             }
         }

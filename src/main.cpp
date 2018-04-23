@@ -1,11 +1,13 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/positional_options.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/errors.hpp>
 
-//#include "patch_match.hpp"
 #include "inpainting.hpp"
-#include "../GUI/cvui.h"
-#include "../GUI/gui_skeleton.hpp"
-
+#include "gui_skeleton.hpp"
 
 using namespace cv;
 using namespace std;
@@ -14,50 +16,64 @@ void clean_mask(Mat1b& mask) {
     mask.forEach([](uchar& p, const int[]){ if (p < 255) p = 0;});
 }
 
+struct Options {
+    string image;
+    string mask;
+    int patchSize;
+    float lambda;
+    int AnnIt;
+} options;
+
 int main(int argc, char** argv) {
-    int create_mask ;
-    if ((argv[1][0] == '-') && (argv[1][1] == 'm')) {
-      create_mask = 1 ;
-    }
-    else {
-      create_mask = 0 ;
-      if (argc != 3) {
-        cout << "usage when using existing mask: Inpainting <Source> <Mask>\n" << "usage when creating mask: Inpainting -m <Source>\n";
-        return -1;
-      }
+    namespace po = boost::program_options;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help,h", "produce help message")
+        ("image,i", po::value<string>(&options.image), "image name")
+        ("mask,m", po::value<string>(&options.mask)->default_value("/"), "mask name, if provided")
+        ("patchSize,p", po::value<int>(&options.patchSize)->default_value(7), "patch size")
+        ("lambda,l", po::value<float>(&options.lambda)->default_value(50.f), "lambda texture feature")
+        ("AnnIt,a", po::value<int>(&options.AnnIt)->default_value(10), "number of ANN iterations")
+    ;
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
+    po::notify(vm);
+    if (vm.count("help")) {
+        cout << desc;
+        return 0;
     }
 
+    int patchSize = options.patchSize;
+    float lambda = options.lambda;
+    int AnnIt = options.AnnIt;
+
     Mat3b image;
-    image = imread(argv[1 + create_mask], CV_LOAD_IMAGE_COLOR);
+    image = imread(options.image, CV_LOAD_IMAGE_COLOR);
     if (!image.data) {
         cout << "No image data \n";
         return -1;
     }
 
     Mat1b mask;
-    if (create_mask) {
-      char *arguments[2] ;
-      arguments[0] = "Create_mask" ;
-      arguments[1] = argv[2] ;
-      mask_from_scratch(2, arguments) ;
-      mask = imread("masque.png", CV_LOAD_IMAGE_GRAYSCALE) ;
+    if (options.mask != "/") {
+        mask = imread(options.mask, CV_LOAD_IMAGE_GRAYSCALE);
+        if (!mask.data) {
+            cout << "No mask data \n";
+            return -1;
+        }
+        clean_mask(mask);
+    } else {
+        cout << "Press ECHAP when the mask is completed. Use + or - to increase or decrease pencil size." << endl;
+        mask_from_scratch(image, mask);
     }
-    else {
-      mask = imread(argv[2], CV_LOAD_IMAGE_GRAYSCALE);
-    }
-    if (!mask.data) {
-        cout << "No mask data \n";
-        return -1;
-    }
-    clean_mask(mask);
 
     namedWindow("Inpainting", WINDOW_AUTOSIZE);
     Mat3b target;
     //cvtColor(image, image, CV_BGR2Lab);
-    inpaint(image, mask, target);
+    inpaint(image, mask, target, patchSize, lambda, AnnIt);
     //cvtColor(target, target, CV_Lab2BGR);
 
-    cout << "done" << endl;
+    cout << "done.\nPress ECHAP to quit." << endl;
     imshow("Inpainting", target);
-    while (waitKey(10) != 'q') {}
+    while (waitKey(10) != 27) {}
 }

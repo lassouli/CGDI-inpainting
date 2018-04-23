@@ -91,9 +91,11 @@ void finalReconstruction(cv::Mat3b& target, cv::Mat1b const& mask, PatchMap cons
     });
 }
 
-void onionPeelInitialization(Mat3b& target, Mat2f& features, Mat1b const& mask, PatchMap const& pm) {
+void onionPeelInitialization(Mat3b& target, Mat2f& features, Mat1b const& mask, PatchMap const& pm, PatchDistance const& patch_distance) {
     Mat1b available; bitwise_not(mask, available);
     Mat2i outborder; Mat2i inborder;
+    double sigma = 1.;
+    vector<double> weights(1, 1.);
     auto const addNeighbours = [&](Vec2i const& pos){
         for (int i = 0; i < 4; ++i) {
             Vec2i v = pos + pm.dirs(i/2, i%2);
@@ -114,6 +116,8 @@ void onionPeelInitialization(Mat3b& target, Mat2f& features, Mat1b const& mask, 
     auto const swapQueue = [&](){
         outborder = inborder;
         inborder.release();
+        sort(begin(weights), end(weights));
+        sigma = weights[int(weights.size()*0.75)];
     };
     swapQueue();
     while (!outborder.empty()) {
@@ -123,25 +127,37 @@ void onionPeelInitialization(Mat3b& target, Mat2f& features, Mat1b const& mask, 
         for (auto const& pos : outborder) {
             Rect origin = pm.get_patch(pos);
             float sum = 0.f;
-            Vec3f color(0,0,0);
-            Vec2f feature(0,0);
+            Vec3d color(0,0,0);
+            Vec2d feature(0,0);
             for (int row = origin.y; row < origin.y+origin.height; ++row) {
                 for (int col = origin.x; col < origin.x+origin.width; ++col) {
                     Vec2i q(row, col);
                     if (available(q) == 0)
                         continue ;
-                    Vec2i alter_ego = q;//pos - q + offset(q);
+                    Vec2i alter_ego = pos - q + pm.offset(q);
                     if (!pm.is_inside(alter_ego) || available(alter_ego) == 0)
                         continue ;
-                    color += static_cast<Vec3f>(target(alter_ego));
-                    feature += features(alter_ego);
-                    sum += 1.0f;
+                    Rect a = pm.get_patch(q);
+                    Rect b = pm.get_patch(pm.offset(q));
+                    pm.crop(a, q, b, pm.offset(q));
+                    double dst = patch_distance(a, b, available);
+                    double s = exp(-dst / (2*sigma*sigma));
+                    color += s * static_cast<Vec3d>(target(alter_ego));
+                    feature += s * static_cast<Vec2d>(features(alter_ego));
+                    sum += s;
                 }
             }
             color /= sum;
             feature /= sum;
             target(pos) = static_cast<Vec3b>(color);
-            features(pos) = feature;
+            features(pos) = static_cast<Vec2f>(feature);
+        }
+        for (auto const& pos : outborder) {
+            Rect a = pm.get_patch(pos);
+            Rect b = pm.get_patch(pm.offset(pos));
+            pm.crop(a, pos, b, pm.offset(pos));
+            float dst = patch_distance(a, b, available);
+            weights.push_back(dst);
         }
         for (int i = 0; i < outborder.rows; ++i) {
             available(outborder(i)) = 255;
@@ -151,6 +167,6 @@ void onionPeelInitialization(Mat3b& target, Mat2f& features, Mat1b const& mask, 
         }
         swapQueue();
         imshow("Inpainting", target);
-        waitKey(1000);
+        waitKey(1);
     }
 }

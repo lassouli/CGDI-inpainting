@@ -7,19 +7,32 @@ using namespace std;
 using namespace cv;
 
 PatchDistance::PatchDistance(cv::Mat3b const& _target, cv::Mat2f const& _features, float _lambda):
-target(_target), features(_features), available(target.rows, target.cols, 255), lambda(_lambda) {}
+target(_target), features(_features), lambda(_lambda) {}
 
 float PatchDistance::operator()(cv::Rect const& a, cv::Rect const& b) const {
     Mat3b target_a(target, a);
     Mat3b target_b(target, b);
     Mat2f features_a(features, a);
     Mat2f features_b(features, b);
-    //Mat1b mask(available, b);
-    //float s = norm(mask, NORM_L1);
     float s = a.width * a .height;
     float target_diff = norm(target_a, target_b, NORM_L2SQR) / s;
     float features_diff = norm(features_a, features_b, NORM_L2SQR) / s;
-    return target_diff + lambda * features_diff;
+    return (target_diff + lambda * features_diff);
+}
+
+float PatchDistance::operator()(
+    cv::Rect const& a,
+    cv::Rect const& b,
+    cv::Mat1b const& available) const {
+    Mat3b target_a(target, a);
+    Mat3b target_b(target, b);
+    Mat2f features_a(features, a);
+    Mat2f features_b(features, b);
+    Mat1b mask(available, b);
+    float s = norm(mask, NORM_L1) / 255.;
+    float target_diff = norm(target_a, target_b, NORM_L2SQR, mask) / s;
+    float features_diff = norm(features_a, features_b, NORM_L2SQR, mask) / s;
+    return (target_diff + lambda * features_diff) / (255 * 255);
 }
 
 Matx<Vec2i,2,2> const PatchMap::dirs{

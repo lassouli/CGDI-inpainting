@@ -55,6 +55,7 @@ namespace {
 
 void inpaint(Mat3b const& image, Mat1b const& mask, Mat3b& output, int patchSize, float lambda, int AnnIt) {
     const int occSize = computeOcclusionSize(mask);
+    patchSize = min(patchSize, 2 * occSize);
     const int L = int(log2(2 * occSize / patchSize));
     vector<Mat3b> imgPyr(L+1);
     vector<Mat1b> maskPyr(L+1);
